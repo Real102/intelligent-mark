@@ -1,41 +1,37 @@
-import type { ReactNode } from 'react'
-
 interface SwitchProps {
   checked: boolean
   onChange: (v: boolean) => void
   label: string
-  description?: ReactNode
-  disabled?: boolean
+  description?: string
 }
 
-export function Switch({ checked, onChange, label, description, disabled }: SwitchProps) {
+export function Switch({ checked, onChange, label, description }: SwitchProps) {
   return (
-    <div className="flex items-start gap-3">
-      <button
-        type="button"
-        role="switch"
-        aria-checked={checked}
-        disabled={disabled}
-        onClick={() => !disabled && onChange(!checked)}
-        className={`relative mt-1 h-5 w-9 flex-shrink-0 rounded-full transition-colors ${
-          checked ? 'bg-blue-500' : 'bg-gray-300'
-        } ${disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={() => onChange(!checked)}
+      className="flex w-full items-center justify-between py-1.5 text-left"
+    >
+      <div>
+        <div className="text-sm font-medium text-text-primary">{label}</div>
+        {description && (
+          <div className="mt-0.5 text-xs text-text-secondary">{description}</div>
+        )}
+      </div>
+      <div
+        className={`flex items-center gap-1.5 text-xs font-semibold ${
+          checked ? 'text-success' : 'text-text-secondary'
+        }`}
       >
         <span
-          className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform ${
-            checked ? 'translate-x-[18px]' : 'translate-x-0.5'
+          className={`inline-block h-2 w-2 rounded-full ${
+            checked ? 'bg-success' : 'bg-text-secondary/40'
           }`}
         />
-      </button>
-      <div className="flex-1">
-        <label
-          className={`text-sm font-medium text-gray-900 ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-          onClick={() => !disabled && onChange(!checked)}
-        >
-          {label}
-        </label>
-        {description && <div className="mt-0.5 text-xs text-gray-500">{description}</div>}
+        <span>{checked ? '开启' : '关闭'}</span>
       </div>
-    </div>
+    </button>
   )
 }

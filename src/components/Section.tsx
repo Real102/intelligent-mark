@@ -8,12 +8,14 @@ interface SectionProps {
 
 export function Section({ title, children, action }: SectionProps) {
   return (
-    <section className="mb-6 rounded-lg border border-gray-200 bg-white p-4">
-      <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-gray-900">{title}</h2>
+    <section className="mb-5">
+      <div className="mb-2 flex items-center justify-between px-1">
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
+          {title}
+        </h2>
         {action}
       </div>
-      {children}
+      <div className="rounded-lg border border-border bg-white p-4">{children}</div>
     </section>
   )
 }
