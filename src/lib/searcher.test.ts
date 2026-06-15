@@ -113,6 +113,33 @@ describe('searchBookmarks', () => {
     const tree = buildTree([{ id: 'a', title: 'GitHub', parentId: '1', url: 'https://github.com' }])
     expect(searchBookmarks('notfound', tree, {})).toEqual([])
   })
+
+  it('结果里带 path（一层）', () => {
+    const tree = buildTree([{ id: 'a', title: 'GitHub', parentId: '1', url: 'https://github.com' }])
+    const r = searchBookmarks('github', tree, {})
+    expect(r[0].path).toBe('书签栏')
+  })
+
+  it('结果里带 path（多层嵌套）', () => {
+    const tree: chrome.bookmarks.BookmarkTreeNode[] = [
+      {
+        id: '1',
+        title: '书签栏',
+        children: [
+          {
+            id: 'f2',
+            title: '开发工具',
+            parentId: '1',
+            children: [
+              { id: 'a', title: 'GitHub', parentId: 'f2', url: 'https://github.com' },
+            ],
+          },
+        ],
+      },
+    ]
+    const r = searchBookmarks('github', tree, {})
+    expect(r[0].path).toBe('书签栏 / 开发工具')
+  })
 })
 
 describe('getRecommendations', () => {

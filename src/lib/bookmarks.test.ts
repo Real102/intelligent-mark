@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getUrlMatchKey, normalizeUrl } from './bookmarks'
+import { getBookmarkPath, getUrlMatchKey, normalizeUrl } from './bookmarks'
 
 describe('normalizeUrl', () => {
   it('小写化', () => {
@@ -54,5 +54,76 @@ describe('getUrlMatchKey', () => {
 
   it('端口号保留', () => {
     expect(getUrlMatchKey('http://localhost:3000/api/users')).toBe('localhost:3000/api/users')
+  })
+})
+
+describe('getBookmarkPath', () => {
+  it('一层嵌套返回顶层文件夹名', () => {
+    const tree: chrome.bookmarks.BookmarkTreeNode[] = [
+      {
+        id: '1',
+        title: '书签栏',
+        children: [{ id: 'a', title: 'A', parentId: '1', url: 'https://a.com' }],
+      },
+    ]
+    expect(getBookmarkPath('a', tree)).toBe('书签栏')
+  })
+
+  it('多层嵌套用 " / " 拼接', () => {
+    const tree: chrome.bookmarks.BookmarkTreeNode[] = [
+      {
+        id: '1',
+        title: '书签栏',
+        children: [
+          {
+            id: '2',
+            title: '开发工具',
+            parentId: '1',
+            children: [
+              { id: 'a', title: 'React', parentId: '2', url: 'https://react.dev' },
+            ],
+          },
+        ],
+      },
+    ]
+    expect(getBookmarkPath('a', tree)).toBe('书签栏 / 开发工具')
+  })
+
+  it('跳过根节点 "0"', () => {
+    const tree: chrome.bookmarks.BookmarkTreeNode[] = [
+      {
+        id: '0',
+        title: '',
+        children: [
+          {
+            id: '1',
+            title: '书签栏',
+            children: [{ id: 'a', title: 'A', parentId: '1', url: 'https://a.com' }],
+          },
+        ],
+      },
+    ]
+    expect(getBookmarkPath('a', tree)).toBe('书签栏')
+  })
+
+  it('找不到节点返回空串', () => {
+    const tree: chrome.bookmarks.BookmarkTreeNode[] = [
+      { id: '1', title: '书签栏', children: [] },
+    ]
+    expect(getBookmarkPath('nope', tree)).toBe('')
+  })
+
+  it('parentId 形成环时不无限循环', () => {
+    // 手动构造一个 A↔B 互指的畸形树
+    const tree: chrome.bookmarks.BookmarkTreeNode[] = [
+      { id: 'A', title: 'TA', parentId: 'B', url: 'https://a.com' },
+      { id: 'B', title: 'TB', parentId: 'A', url: 'https://b.com' },
+    ]
+    // 关键断言：函数不死循环、能在合理时间返回
+    const start = Date.now()
+    const result = getBookmarkPath('A', tree)
+    expect(Date.now() - start).toBeLessThan(100)
+    expect(typeof result).toBe('string')
+    expect(result.length).toBeGreaterThan(0)
   })
 })

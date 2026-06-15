@@ -3,10 +3,11 @@ interface BookmarkItemProps {
   title: string
   url: string
   count?: number
+  path?: string
   onClick?: (id: string, url: string) => void
 }
 
-export function BookmarkItem({ id, title, url, count, onClick }: BookmarkItemProps) {
+export function BookmarkItem({ id, title, url, count, path, onClick }: BookmarkItemProps) {
   return (
     <button
       type="button"
@@ -20,6 +21,9 @@ export function BookmarkItem({ id, title, url, count, onClick }: BookmarkItemPro
       </div>
       <div className="min-w-0 flex-1">
         <div className="truncate text-sm font-semibold text-text-primary">{title}</div>
+        {path && (
+          <div className="truncate text-xs text-text-secondary">{path}</div>
+        )}
         <div className="truncate text-xs text-text-secondary">{url}</div>
       </div>
       {count !== undefined && count > 0 && (

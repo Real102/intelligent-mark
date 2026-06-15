@@ -1,4 +1,5 @@
 import { isFolder, isOtherBookmarks } from './filter'
+import { getBookmarkPath } from './bookmarks'
 import type { VisitCounts } from '@/types'
 
 export interface SearchResult {
@@ -7,6 +8,7 @@ export interface SearchResult {
   url: string
   score: number
   count: number
+  path: string
 }
 
 const SEARCH_TOP_N = 5
@@ -64,7 +66,14 @@ export function searchBookmarks(
     const score = computeScore(lowerQuery, node.title, node.url)
     if (score === 0) continue
     const count = visitCounts[node.id]?.count ?? 0
-    results.push({ id: node.id, title: node.title, url: node.url, score, count })
+    results.push({
+      id: node.id,
+      title: node.title,
+      url: node.url,
+      score,
+      count,
+      path: getBookmarkPath(node.id, tree),
+    })
   }
 
   results.sort((a, b) => {
@@ -93,7 +102,14 @@ export function getRecommendations(
     if (isFolder(node) || !node.url) continue
     const count = visitCounts[node.id]?.count ?? 0
     if (count === 0) continue
-    candidates.push({ id: node.id, title: node.title, url: node.url, score: 0, count })
+    candidates.push({
+      id: node.id,
+      title: node.title,
+      url: node.url,
+      score: 0,
+      count,
+      path: getBookmarkPath(node.id, tree),
+    })
   }
   candidates.sort((a, b) => b.count - a.count)
   return candidates.slice(0, limit)

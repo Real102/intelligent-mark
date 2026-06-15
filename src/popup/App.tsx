@@ -100,6 +100,7 @@ function App() {
                     title={r.title}
                     url={r.url}
                     count={r.count}
+                    path={r.path}
                     onClick={(_id, url) => openBookmark(url)}
                   />
                 ))}
