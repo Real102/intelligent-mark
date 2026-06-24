@@ -3,18 +3,14 @@ import { Settings } from 'lucide-react'
 import { getBookmarkTree } from '@/lib/bookmarks'
 import { getVisitCounts } from '@/lib/storage'
 import { getRecommendations, searchBookmarks } from '@/lib/searcher'
-import { BookmarkItem, EmptyState, SearchBox } from '@/components'
+import { BookmarkItem, EmptyState, SearchBox, Toast } from '@/components'
 import type { SearchResult } from '@/lib/searcher'
 import type { VisitCounts } from '@/types'
+import type { ToastMessage } from '@/components/Toast'
 
 function openBookmark(url: string): void {
-  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    const tabId = tabs[0]?.id
-    if (tabId !== undefined) {
-      chrome.tabs.update(tabId, { url, active: true })
-    }
-    window.close()
-  })
+  chrome.tabs.create({ url })
+  window.close()
 }
 
 function openOptions(): void {
@@ -25,9 +21,10 @@ function openOptions(): void {
 interface ResultListProps {
   results: SearchResult[]
   onOpen: (url: string) => void
+  onCopy: (url: string) => void
 }
 
-function ResultList({ results, onOpen }: ResultListProps) {
+function ResultList({ results, onOpen, onCopy }: ResultListProps) {
   return (
     <div className="space-y-2">
       {results.map((r) => (
@@ -39,6 +36,7 @@ function ResultList({ results, onOpen }: ResultListProps) {
           count={r.count}
           path={r.path}
           onClick={(_id, url) => onOpen(url)}
+          onCopy={onCopy}
         />
       ))}
     </div>
@@ -49,6 +47,7 @@ function App() {
   const [tree, setTree] = useState<chrome.bookmarks.BookmarkTreeNode[] | null>(null)
   const [counts, setCounts] = useState<VisitCounts>({})
   const [query, setQuery] = useState('')
+  const [toast, setToast] = useState<ToastMessage | null>(null)
 
   useEffect(() => {
     void (async () => {
@@ -74,6 +73,15 @@ function App() {
   const handleOpen = useCallback((url: string) => openBookmark(url), [])
   const isLoaded = tree !== null
 
+  const handleCopy = useCallback(async (url: string) => {
+    try {
+      await navigator.clipboard.writeText(url)
+      setToast({ id: Date.now(), kind: 'success', text: '已复制链接' })
+    } catch {
+      setToast({ id: Date.now(), kind: 'error', text: '复制失败' })
+    }
+  }, [])
+
   return (
     <div className="flex h-[600px] w-[375px] flex-col overflow-hidden bg-white">
       <header className="flex items-center justify-between border-b border-border bg-surface px-4 py-3">
@@ -97,7 +105,7 @@ function App() {
           !isLoaded ? null : searchResults.length === 0 ? (
             <EmptyState mode="no-results" query={trimmedQuery} />
           ) : (
-            <ResultList results={searchResults} onOpen={handleOpen} />
+            <ResultList results={searchResults} onOpen={handleOpen} onCopy={handleCopy} />
           )
         ) : (
           <>
@@ -105,11 +113,12 @@ function App() {
             {!isLoaded ? null : recommendations.length === 0 ? (
               <EmptyState mode="no-recommendations" />
             ) : (
-              <ResultList results={recommendations} onOpen={handleOpen} />
+              <ResultList results={recommendations} onOpen={handleOpen} onCopy={handleCopy} />
             )}
           </>
         )}
       </main>
+      <Toast message={toast} onDismiss={() => setToast(null)} />
     </div>
   )
 }
