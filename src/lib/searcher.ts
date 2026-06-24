@@ -11,7 +11,6 @@ export interface SearchResult {
   path: string
 }
 
-const SEARCH_TOP_N = 5
 const DEFAULT_RECOMMENDATION_LIMIT = 3
 
 /**
@@ -36,17 +35,33 @@ function computeScore(lowerQuery: string, title: string, url: string): number {
   const lowerUrl = url.toLowerCase()
   if (lowerTitle === lowerQuery) return 1.0
   if (lowerTitle.includes(lowerQuery)) return 0.5
+  if (isSubsequence(lowerQuery, lowerTitle)) return 0.4
   if (lowerUrl.includes(lowerQuery)) return 0.3
   return 0
+}
+
+/**
+ * query 字符按顺序在 text 里出现（中间允许其他字符）。
+ * - 大小写不敏感（要求调用方已转小写）
+ * - query 长度 < 2 视为不命中（单字符太宽，会匹配几乎所有含该字的 title）
+ */
+function isSubsequence(query: string, text: string): boolean {
+  if (query.length < 2) return false
+  let qi = 0
+  for (let i = 0; i < text.length && qi < query.length; i++) {
+    if (text[i] === query[qi]) qi++
+  }
+  return qi === query.length
 }
 
 /**
  * 模糊搜索书签。
  * - query 为空（含纯空格）返回空
  * - 匹配 title/URL（includes，大小写不敏感）
- * - 得分：title 全匹配=1.0，title 部分=0.5，URL=0.3（取最高）
+ * - 兜底：query 长度 ≥ 2 时，title 字符子序列也命中
+ * - 得分：title 全匹配=1.0，title 部分=0.5，title 子序列=0.4，URL=0.3（取最高）
  * - 排序：score 降序 → count 降序
- * - 最多返回 5 条
+ * - 返回所有命中（不限制条数）
  */
 export function searchBookmarks(
   query: string,
@@ -81,11 +96,11 @@ export function searchBookmarks(
     return b.count - a.count
   })
 
-  return results.slice(0, SEARCH_TOP_N)
+  return results
 }
 
 /**
- * 推荐书签：按 count 降序，最多 limit 条。
+ * 推荐书签：按 count 降序，最多 limit 条（默认 3）。
  * - count=0 不展示
  * - 排除文件夹和"其他书签"子树
  */

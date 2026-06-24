@@ -13,3 +13,12 @@ body {
   color: #1E293B;
   -webkit-font-smoothing: antialiased;
 }
+
+/* 可滚动但隐藏滚动条（Popup 内容区使用） */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

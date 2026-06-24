@@ -53,6 +53,24 @@ describe('searchBookmarks', () => {
     expect(r[0].score).toBe(0.3)
   })
 
+  it('title 字符子序列命中得分 0.4（query 长度 ≥ 2）', () => {
+    // "网大" 在 "中国移动在线网上大学" 里按顺序能找到（网在"网上"、大在"大学"，中间隔"上"字）
+    const tree = buildTree([
+      { id: 'a', title: '中国移动在线网上大学', parentId: '1', url: 'https://example.com' },
+    ])
+    const r = searchBookmarks('网大', tree, {})
+    expect(r).toHaveLength(1)
+    expect(r[0].score).toBe(0.4)
+  })
+
+  it('title 字符顺序错不命中', () => {
+    // "hgit" 在 "github" 里 h 之后找不到 g
+    const tree = buildTree([
+      { id: 'a', title: 'github', parentId: '1', url: 'https://example.com' },
+    ])
+    expect(searchBookmarks('hgit', tree, {})).toEqual([])
+  })
+
   it('大小写不敏感', () => {
     const tree = buildTree([{ id: 'a', title: 'GitHub', parentId: '1', url: 'https://github.com' }])
     const r = searchBookmarks('github', tree, {})
@@ -96,7 +114,7 @@ describe('searchBookmarks', () => {
     expect(r[1].id).toBe('a')
   })
 
-  it('最多返回 5 条', () => {
+  it('返回所有命中（不限条数）', () => {
     const tree = buildTree(
       Array.from({ length: 8 }, (_, i) => ({
         id: `n${i}`,
@@ -106,7 +124,7 @@ describe('searchBookmarks', () => {
       })),
     )
     const r = searchBookmarks('github', tree, {})
-    expect(r).toHaveLength(5)
+    expect(r).toHaveLength(8)
   })
 
   it('不匹配返回空', () => {

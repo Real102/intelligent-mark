@@ -192,7 +192,7 @@ function App() {
     <div className="min-h-screen bg-surface py-6">
       <div className="mx-auto w-[800px]">
         <div className="mb-3 px-1">
-          <h1 className="text-lg font-semibold text-text-primary">设置页 · 800宽度适配版</h1>
+          <h1 className="text-lg font-semibold text-text-primary">智能书签·设置</h1>
         </div>
         <div className="mb-4 h-px bg-border" />
 
