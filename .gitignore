@@ -21,3 +21,7 @@ tsconfig.node.tsbuildinfo
 .playwright-mcp/
 .claude/settings.local.json
 .worktrees/
+
+# Quality gates (local only; regenerate via sdd:init-hooks on a fresh clone)
+.githooks/
+scripts/

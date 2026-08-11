@@ -10,7 +10,9 @@
     "preview": "vite preview",
     "typecheck": "tsc -b --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "verify:gates": "sh scripts/gates/test-gates.sh && python3 scripts/gates/check-docs-frontmatter.py --all",
+    "verify": "npm run verify:gates && npm run typecheck && npm test"
   },
   "dependencies": {
     "lucide-react": "^0.400.0",

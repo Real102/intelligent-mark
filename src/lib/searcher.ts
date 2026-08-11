@@ -1,5 +1,5 @@
 import { isFolder, isOtherBookmarks } from './filter'
-import { getBookmarkPath } from './bookmarks'
+import { buildNodeMap, getBookmarkPath } from './bookmarks'
 import type { VisitCounts } from '@/types'
 
 export interface SearchResult {
@@ -75,6 +75,9 @@ export function searchBookmarks(
   const all: chrome.bookmarks.BookmarkTreeNode[] = []
   collectAll(tree, all)
 
+  const nodeMap = new Map<string, chrome.bookmarks.BookmarkTreeNode>()
+  buildNodeMap(tree, nodeMap)
+
   const results: SearchResult[] = []
   for (const node of all) {
     if (isFolder(node) || !node.url) continue
@@ -87,7 +90,7 @@ export function searchBookmarks(
       url: node.url,
       score,
       count,
-      path: getBookmarkPath(node.id, tree),
+      path: getBookmarkPath(node.id, tree, nodeMap),
     })
   }
 
@@ -112,6 +115,9 @@ export function getRecommendations(
   const all: chrome.bookmarks.BookmarkTreeNode[] = []
   collectAll(tree, all)
 
+  const nodeMap = new Map<string, chrome.bookmarks.BookmarkTreeNode>()
+  buildNodeMap(tree, nodeMap)
+
   const candidates: SearchResult[] = []
   for (const node of all) {
     if (isFolder(node) || !node.url) continue
@@ -123,7 +129,7 @@ export function getRecommendations(
       url: node.url,
       score: 0,
       count,
-      path: getBookmarkPath(node.id, tree),
+      path: getBookmarkPath(node.id, tree, nodeMap),
     })
   }
   candidates.sort((a, b) => b.count - a.count)

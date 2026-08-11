@@ -73,7 +73,7 @@ export function* walkBookmarks(
   }
 }
 
-function buildNodeMap(
+export function buildNodeMap(
   nodes: chrome.bookmarks.BookmarkTreeNode[],
   map: Map<string, chrome.bookmarks.BookmarkTreeNode>,
 ): void {
@@ -93,9 +93,10 @@ function buildNodeMap(
 export function getBookmarkPath(
   id: string,
   tree: chrome.bookmarks.BookmarkTreeNode[],
+  nodeMap?: Map<string, chrome.bookmarks.BookmarkTreeNode>,
 ): string {
-  const map = new Map<string, chrome.bookmarks.BookmarkTreeNode>()
-  buildNodeMap(tree, map)
+  const map = nodeMap ?? new Map<string, chrome.bookmarks.BookmarkTreeNode>()
+  if (!nodeMap) buildNodeMap(tree, map)
   const node = map.get(id)
   if (!node) return ''
 
