@@ -1,6 +1,7 @@
 export { BookmarkItem } from './BookmarkItem'
 export { EmptyState } from './EmptyState'
 export { SearchBox } from './SearchBox'
+export { SkeletonList } from './SkeletonList'
 export { Toast } from './Toast'
 export type { ToastMessage, ToastKind } from './Toast'
 export { StorageBanner } from './StorageBanner'

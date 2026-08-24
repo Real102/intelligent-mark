@@ -3,7 +3,7 @@ import { Settings } from 'lucide-react'
 import { getBookmarkTree } from '@/lib/bookmarks'
 import { getVisitCounts } from '@/lib/storage'
 import { getRecommendations, searchBookmarks } from '@/lib/searcher'
-import { BookmarkItem, EmptyState, SearchBox, Toast } from '@/components'
+import { BookmarkItem, EmptyState, SearchBox, SkeletonList, Toast } from '@/components'
 import type { SearchResult } from '@/lib/searcher'
 import type { VisitCounts } from '@/types'
 import type { ToastMessage } from '@/components/Toast'
@@ -102,7 +102,9 @@ function App() {
 
       <main className="flex-1 overflow-y-auto bg-surface px-4 py-3 no-scrollbar">
         {isSearching ? (
-          !isLoaded ? null : searchResults.length === 0 ? (
+          !isLoaded ? (
+            <SkeletonList />
+          ) : searchResults.length === 0 ? (
             <EmptyState mode="no-results" query={trimmedQuery} />
           ) : (
             <ResultList results={searchResults} onOpen={handleOpen} onCopy={handleCopy} />
@@ -110,7 +112,9 @@ function App() {
         ) : (
           <>
             <h2 className="mb-2 text-sm font-semibold text-text-primary">推荐书签</h2>
-            {!isLoaded ? null : recommendations.length === 0 ? (
+            {!isLoaded ? (
+              <SkeletonList />
+            ) : recommendations.length === 0 ? (
               <EmptyState mode="no-recommendations" />
             ) : (
               <ResultList results={recommendations} onOpen={handleOpen} onCopy={handleCopy} />
