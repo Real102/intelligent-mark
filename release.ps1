@@ -111,8 +111,12 @@ git push origin HEAD --follow-tags
 if ($LASTEXITCODE -ne 0) { throw 'git push 失败' }
 
 # ---------- 7. 创建 GitHub Release 并上传 zip ----------
-$notesArgs = if ($Notes) { @('--notes', $Notes) } else { @('--generate-notes') }
-gh release create $tag $zipPath --title $tag @notesArgs
+# 注意：不要用 splatting 传 '--generate-notes'（@notesArgs 会把字符串拆成单字符参数），直接分支调用
+if ($Notes) {
+    gh release create $tag $zipPath --title $tag --notes $Notes
+} else {
+    gh release create $tag $zipPath --title $tag --generate-notes
+}
 if ($LASTEXITCODE -ne 0) { throw 'gh release create 失败' }
 
 Write-Host "`n发布完成: $tag"
