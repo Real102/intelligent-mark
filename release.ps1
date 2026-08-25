@@ -8,7 +8,8 @@ param(
     [string]$Message = 'update',   # 本次改动的 commit 信息
     [string]$Notes = '',           # Release 说明，留空则自动生成
     [string]$SourceDir = 'dist',   # 打包源目录：本项目为 Vite 构建输出目录 dist
-    [switch]$SkipBuild             # 已执行过 npm run build 时跳过构建
+    [switch]$SkipBuild,            # 已执行过 npm run build 时跳过构建
+    [string]$AssetName = 'intelligent-mark-v{version}.zip'   # zip 附件名模板，支持 {version}/{tag} 占位符
 )
 
 $ErrorActionPreference = 'Stop'
@@ -84,7 +85,8 @@ if (-not (Test-Path (Join-Path $sourcePath 'manifest.json'))) {
 
 $releaseDir = Join-Path $root 'release'
 New-Item -ItemType Directory -Force -Path $releaseDir | Out-Null
-$zipPath = Join-Path $releaseDir "extension-$tag.zip"
+$zipName = $AssetName -replace '\{version\}', $newVersion -replace '\{tag\}', $tag
+$zipPath = Join-Path $releaseDir $zipName
 if (Test-Path $zipPath) { Remove-Item $zipPath -Force }
 
 # 用 .NET ZipArchive 而非 Compress-Archive：后者在 PS 5.1 生成的条目路径为反斜杠，
